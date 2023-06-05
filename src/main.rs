@@ -146,6 +146,9 @@ async fn real_time(
                     }
                 
                 if amts.abs() > threshold {
+                    let sender = format!("{}账号", name);
+                    let content = format!("当前净头寸高于阈值,阈值值为{}",threshold);
+                    wx_robot.send_text(&sender, &content).await;
                     println!("高于阈值")
                 }
                 // net_worth = notional_total/ori_fund;
