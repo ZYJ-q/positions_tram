@@ -106,7 +106,9 @@ async fn real_time(
                 &f_config.secret_key,
             );
             let name = f_config.name;
-            let threshold: f64 = f_config.threshold.as_str().parse().unwrap();
+            let thre = f_config.threshold;
+            let threshold: f64 = thre.parse().unwrap();
+            if thre.len() != 0  {
             if let Some(data) = binance_futures_api.account(None).await {
                 let v: Value = serde_json::from_str(&data).unwrap();
                 let positions = v.as_object().unwrap().get("positions").unwrap().as_array().unwrap();
@@ -114,37 +116,41 @@ async fn real_time(
                 let mut prices: f64 = 0.0;
                 
                 println!("获取到的账户持仓:{:?}, 名字{}, 阈值{}", positions, name, threshold);
-                for p in positions {
-                    let obj = p.as_object().unwrap();
-                    let position_amt: f64 = obj.get("positionAmt").unwrap().as_str().unwrap().parse().unwrap();
-                    
-                    if position_amt == 0.0 {
-                        continue;
-                    } else {
+                
+                    for p in positions {
+                        let obj = p.as_object().unwrap();
+                        let position_amt: f64 = obj.get("positionAmt").unwrap().as_str().unwrap().parse().unwrap();
                         
-                    let symbol = obj.get("symbol").unwrap().as_str().unwrap();
-                    let symbols= &symbol[0..symbol.len()-4];
-                    // println!("symbols: {},symbol: {}", symbols, symbol);
-                    let sbol = format!("{}USDT", symbols);
-                    // println!("传过去的参数{}", sbol);
-                        if let Some(data) = binance_futures_api.get_klines(&sbol).await {
-                            let v: Value = serde_json::from_str(&data).unwrap();
-                            let price_obj = v.as_object().unwrap();
-        
-                            let price:f64 = price_obj.get("price").unwrap().as_str().unwrap().parse().unwrap();
-                            // let new_amt = position_amt * price;
-                            amts += position_amt;
-                            prices = price;
+                        if position_amt == 0.0 {
+                            continue;
+                        } else {
+                            
+                        let symbol = obj.get("symbol").unwrap().as_str().unwrap();
+                        let symbols= &symbol[0..symbol.len()-4];
+                        // println!("symbols: {},symbol: {}", symbols, symbol);
+                        let sbol = format!("{}USDT", symbols);
+                        // println!("传过去的参数{}", sbol);
+                            if let Some(data) = binance_futures_api.get_klines(&sbol).await {
+                                let v: Value = serde_json::from_str(&data).unwrap();
+                                let price_obj = v.as_object().unwrap();
+            
+                                let price:f64 = price_obj.get("price").unwrap().as_str().unwrap().parse().unwrap();
+                                // let new_amt = position_amt * price;
+                                amts += position_amt;
+                                prices = price;
+                            }
                         }
+            
                     }
-        
-                }
+                
                 if amts.abs() > threshold {
                     println!("高于阈值")
                 }
                 // net_worth = notional_total/ori_fund;
                 // net_worth_histories.push_back(Value::from(new_account_object));
             }
+
+        }
             
 
              
