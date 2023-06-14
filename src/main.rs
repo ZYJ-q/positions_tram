@@ -107,9 +107,10 @@ async fn real_time(
             );
             let name = f_config.name;
             let thre = f_config.threshold;
+            let alarm = f_config.alarm;
             
             println!("阈值的长度{}, 数值{}", thre.len(), thre);
-            if thre.len() != 0  {
+            if thre.len() != 0 &&  alarm == "true" {
                 let threshold: f64 = thre.parse().unwrap();
             if let Some(data) = binance_futures_api.account(None).await {
                 let v: Value = serde_json::from_str(&data).unwrap();
