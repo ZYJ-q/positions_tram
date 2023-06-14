@@ -145,6 +145,8 @@ async fn real_time(
                         }
             
                     }
+
+                println!("amts{}", amts.abs());
                 
                 if amts.abs() > threshold {
                     let sender = format!("{}账号", name);
